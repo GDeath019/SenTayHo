@@ -10,6 +10,7 @@ public class restaurant {
         this.name = name;
         this.local = local;
         this.rate = rate;
+
     }
 
     public restaurant() {

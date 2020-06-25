@@ -1,9 +1,11 @@
 package com.example.thi1;
 
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -22,6 +24,7 @@ public class MainActivity extends AppCompatActivity {
     FloatingActionButton fabAdd;
     ListView lv;
     DBHelper dbh;
+    int REQUEST = 123;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -30,11 +33,11 @@ public class MainActivity extends AppCompatActivity {
         dbh = new DBHelper(MainActivity.this);
         dbh.openDB();
         /////
-        final ArrayList<restaurant> ktra = dbh.getAll();
+        final ArrayList<HoaDon> ktra = dbh.getAll();
         if(ktra.size()<1){
             add();
         }
-        final ArrayList<restaurant> arrayList = dbh.getAll();
+        final ArrayList<HoaDon> arrayList = dbh.getAll();
         final ResAdapter resAdapter = new ResAdapter(getApplicationContext(), arrayList);
         lv.setAdapter(resAdapter);
         lv.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
@@ -46,9 +49,22 @@ public class MainActivity extends AppCompatActivity {
                 alert.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        long x = dbh.Delete(arrayList.get(position).getMa());
-                        arrayList.remove(position);
+                        HoaDon itemRes =(HoaDon) resAdapter.getItem(position);
+                        // xóa phần tử theo item nhận được chứ ko dùng postion
+                        long x = dbh.Delete(itemRes.getMa());
+                        //kiểm tra trong array xem phần tử mà mình xóa là cái nào rồi xóa bỏ nó đi
+                        for (int i=0;i<=arrayList.size();i++){
+                            if (arrayList.get(i).getMa() == itemRes.getMa()){
+                                arrayList.remove(i);
+                                break;
+                            }
+                        }
+                        // xóa xong thì update lại adapter để nó biết là dã thay đổi phần tử
                         resAdapter.notifyDataSetChanged();
+                        if (edt.getText().length()>0){
+                            // filter lại như lúc mình mới xóa để update
+                            resAdapter.getFilter().filter(edt.getText());
+                        }
                         if(x==0){
                             Toast.makeText(MainActivity.this, "error", Toast.LENGTH_SHORT).show();
                         }else{
@@ -77,18 +93,31 @@ public class MainActivity extends AppCompatActivity {
 
             }
         });
+        fabAdd.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(MainActivity.this , AddLocal.class);
+                startActivity(intent);
+            }
+        });
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == REQUEST && resultCode == RESULT_OK){
+            dbh.openDB();
+        }
     }
 
     private void add() {
         long x =0;
-        x += dbh.Insert(1,"Sen Tây Hồ", "Lạc Long Quân", 8.8);
-        Toast.makeText(this, "DONE1", Toast.LENGTH_LONG).show();
-        x += dbh.Insert(2,"Nón Lá", "Nguyễn Đình Chiểu", 8.8);
-        Toast.makeText(this, "DONE1", Toast.LENGTH_LONG).show();
-        x += dbh.Insert(3,"Sen Tây Hồ", "Lạc Long Quân", 8.8);
-        Toast.makeText(this, "DONE1", Toast.LENGTH_LONG).show();
-        x += dbh.Insert(4,"Sen Tây Hồ", "Lạc Long Quân", 8.8);
-        Toast.makeText(this, "DONE1", Toast.LENGTH_LONG).show();
+        x += dbh.Insert(1,"30K1-129.84", 12.5, 8800, 5.0);
+        x += dbh.Insert(2,"29D2-283.34", 14.3, 8800, 5.0);
+        x += dbh.Insert(3,"30K1-129.84", 9.2, 8800, 5.0);
+        x += dbh.Insert(4,"29M3-857.65", 9.6, 8800, 5.0);
+        x += dbh.Insert(5,"29T2-648.87", 6.5, 8800, 5.0);
+        x += dbh.Insert(6,"29T4-746.75", 4.7, 8800, 5.0);
     }
 
     private void AnhXa() {
@@ -100,4 +129,9 @@ public class MainActivity extends AppCompatActivity {
         super.onStop();
         dbh.closeDB();
     }
+//    private void disableEditText() {
+//        boolean check = false;
+//        edt.setInputType(InputType.TYPE_NULL);
+//        edt.setFocusable(check);
+//    }
 }

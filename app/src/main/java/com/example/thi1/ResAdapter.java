@@ -12,11 +12,11 @@ import java.util.ArrayList;
 
 public class ResAdapter extends BaseAdapter {
     private Context context;
-    private ArrayList<restaurant> arrayList;
-    private ArrayList<restaurant> filterList;
+    private ArrayList<HoaDon> arrayList;
+    private ArrayList<HoaDon> filterList;
     private CustomFilter filter;
 
-    public ResAdapter(Context context, ArrayList<restaurant> arrayList) {
+    public ResAdapter(Context context, ArrayList<HoaDon> arrayList) {
         this.context = context;
         this.arrayList = arrayList;
         this.filterList = arrayList;
@@ -44,15 +44,16 @@ public class ResAdapter extends BaseAdapter {
             LayoutInflater inflater =LayoutInflater.from(context);
             view = inflater.inflate(R.layout.custom_res, null);
         }
-        restaurant res = (restaurant) getItem(position);
-        if(res != null){
+        HoaDon tx = (HoaDon) getItem(position);
+        if(tx != null){
             TextView tvName = view.findViewById(R.id.tvName);
             TextView tvDiaChi = view.findViewById(R.id.tvDiaChi);
             TextView tvRate = view.findViewById(R.id.tvRate);
             /////
-            tvName.setText(arrayList.get(position).getName());
-            tvDiaChi.setText(arrayList.get(position).getLocal());
-            tvRate.setText(arrayList.get(position).getRate().toString());
+            tvName.setText(arrayList.get(position).getBienSoXe());
+            tvDiaChi.setText("Quãng đường: "+arrayList.get(position).getQuangDuong().toString()+" km");
+            Double dongia =  Double.parseDouble(arrayList.get(position).getDonGia().toString())*arrayList.get(position).getQuangDuong()*(100-arrayList.get(position).getGiamGia())/100;
+            tvRate.setText(dongia.toString());
         }
         return view;
     }
@@ -70,19 +71,18 @@ public class ResAdapter extends BaseAdapter {
             if (constraint != null && constraint.length() > 0) {
                 //CONSTRAINT TO UPPER
                 constraint = constraint.toString().toUpperCase();
-                ArrayList<restaurant> filters = new ArrayList<restaurant>();
+                ArrayList<HoaDon> filters = new ArrayList<HoaDon>();
                 //get specific item
                 for (int i = 0; i < filterList.size(); i++) {
-                    if (filterList.get(i).getName().toUpperCase().contains(constraint) || filterList.get(i).getLocal().toUpperCase().contains(constraint)) {
-                        restaurant p = new restaurant(filterList.get(i).getMa(), filterList.get(i).getName(), filterList.get(i).getLocal(), filterList.get(i).getRate());
+                    Double dg = filterList.get(i).getDonGia()*filterList.get(i).getQuangDuong()*(100-filterList.get(i).getGiamGia())/100;
+                    if (dg<Double.parseDouble(constraint.toString())) {
+                        HoaDon p = new HoaDon(filterList.get(i).getMa(), filterList.get(i).getBienSoXe(), filterList.get(i).getQuangDuong(), filterList.get(i).getDonGia(), filterList.get(i).getGiamGia());
                         filters.add(p);
-
                     }
 
                 }
                 results.count = filters.size();
                 results.values = filters;
-
             } else {
                 results.count = filterList.size();
                 results.values = filterList;
@@ -92,7 +92,7 @@ public class ResAdapter extends BaseAdapter {
 
         @Override
         protected void publishResults(CharSequence constraint, FilterResults results) {
-            arrayList = (ArrayList<restaurant>)results.values;
+            arrayList = (ArrayList<HoaDon>)results.values;
             notifyDataSetChanged();
         }
     }

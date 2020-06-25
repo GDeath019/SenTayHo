@@ -12,13 +12,14 @@ import java.util.ArrayList;
 
 public class DBHelper extends SQLiteOpenHelper {
     private SQLiteDatabase myDB;
-    private static final String DBname = "ress.db";
+    private static final String DBname = "tx.db";
     private static final int VERSION = 1;
-    private static final String TABLE_NAME = "Restaurant";
+    private static final String TABLE_NAME = "Taxi";
     private static final String ID = "_id";
-    private static final String NAME = "name";
-    private static final String DIACHI = "DiaChi";
-    private static final String RATE = "rate";
+    private static final String BIENSOXE = "biensoxe";
+    private static final String QUANGDUONG = "quangduong";
+    private static final String DONGIA = "dongia";
+    private static final String GIAMGIA = "giamgia";
 
     public DBHelper(@Nullable Context context) {
         super(context, DBname, null, VERSION);
@@ -28,25 +29,30 @@ public class DBHelper extends SQLiteOpenHelper {
         return ID;
     }
 
-    public static String getNAME() {
-        return NAME;
+    public static String getBIENSOXE() {
+        return BIENSOXE;
     }
 
-    public static String getDIACHI() {
-        return DIACHI;
+    public static String getQUANGDUONG() {
+        return QUANGDUONG;
     }
 
-    public static String getRATE() {
-        return RATE;
+    public static String getDONGIA() {
+        return DONGIA;
+    }
+
+    public static String getGIAMGIA() {
+        return GIAMGIA;
     }
 
     @Override
     public void onCreate(SQLiteDatabase db) {
         String queryTB = "CREATE TABLE "+TABLE_NAME+" ( "+
                 ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                NAME + " TEXT NOT NULL, "+
-                DIACHI + " TEXT NOT NULL, "+
-                RATE + " DOUBLE NOT NULL )";
+                BIENSOXE + " TEXT NOT NULL, "+
+                QUANGDUONG + " TEXT NOT NULL, "+
+                DONGIA + " DOUBLE NOT NULL, "+
+                GIAMGIA + " DOUBLE NOT NULL )";
         db.execSQL(queryTB);
     }
 
@@ -56,7 +62,7 @@ public class DBHelper extends SQLiteOpenHelper {
     }
 
     public void openDB(){
-        myDB = getWritableDatabase();
+            myDB = getWritableDatabase();
     }
 
     public void closeDB(){
@@ -64,21 +70,23 @@ public class DBHelper extends SQLiteOpenHelper {
             myDB.close();
         }
     }
-    public long Insert(int id, String name, String diachi, double rate){
+    public long Insert(int id, String BienSoXe, Double QuangDuong, double DonGia, Double giamgia){
         ContentValues contentValues = new ContentValues();
         contentValues.put(ID ,id);
-        contentValues.put(NAME,name);
-        contentValues.put(DIACHI,diachi);
-        contentValues.put(RATE,rate);
+        contentValues.put(BIENSOXE,BienSoXe);
+        contentValues.put(QUANGDUONG,QuangDuong);
+        contentValues.put(DONGIA,DonGia);
+        contentValues.put(GIAMGIA, giamgia);
         return myDB.insert(TABLE_NAME, null, contentValues);
     }
 
-    public long Update(int id, String name, String diachi, double rate){
+    public long Update(int id, String BienSoXe, Double QuangDuong, double DonGia, Double giamgia){
         ContentValues contentValues = new ContentValues();
         contentValues.put(ID ,id);
-        contentValues.put(NAME,name);
-        contentValues.put(DIACHI,diachi);
-        contentValues.put(RATE,rate);
+        contentValues.put(BIENSOXE,BienSoXe);
+        contentValues.put(QUANGDUONG,QuangDuong);
+        contentValues.put(DONGIA,DonGia);
+        contentValues.put(GIAMGIA, giamgia);
         String where = ID +" = "+id;
         return myDB.update(TABLE_NAME, contentValues, where, null);
     }
@@ -89,22 +97,23 @@ public class DBHelper extends SQLiteOpenHelper {
     }
 
     public Cursor getAllRecord(){
-        String query = "SELECT * FROM "+ TABLE_NAME +" ORDER BY " + NAME +" asc";
+        String query = "SELECT * FROM "+ TABLE_NAME +" ORDER BY " + DONGIA +" desc";
         return myDB.rawQuery(query, null);
     }
 
-    public ArrayList<restaurant> getAll(){
-        ArrayList<restaurant> st = new ArrayList<>();
-        String where = "SELECT * FROM "+ TABLE_NAME +" ORDER BY " + NAME +" asc";
+    public ArrayList<HoaDon> getAll(){
+        ArrayList<HoaDon> st = new ArrayList<>();
+        String where = "SELECT * FROM "+ TABLE_NAME +" ORDER BY " + DONGIA +" desc";
         Cursor cursor = myDB.rawQuery(where,null);
         if (cursor.moveToFirst()){
             do {
-                restaurant res = new restaurant();
-                res.setMa(cursor.getInt(0));
-                res.setName(cursor.getString(1));
-                res.setLocal(cursor.getString(2));
-                res.setRate(cursor.getDouble(3));
-                st.add(res);
+                HoaDon tx = new HoaDon();
+                tx.setMa(cursor.getInt(0));
+                tx.setBienSoXe(cursor.getString(1));
+                tx.setQuangDuong(Double.parseDouble(cursor.getString(2)));
+                tx.setDonGia(Double.parseDouble(cursor.getString(3)));
+                tx.setGiamGia(Double.parseDouble(cursor.getString(4)));
+                st.add(tx);
             }while (cursor.moveToNext());
         }
         return st;
